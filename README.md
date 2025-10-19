@@ -35,8 +35,23 @@ echo "OPENROUTER_API_KEY=your_api_key_here" > .env
 ### 3. Run the Backtest
 
 ```bash
-python backtest_llms.py
+python3 backtest_llms.py
 ```
+
+### 4. Visualize Results
+
+```bash
+python3 visualize_results.py
+```
+
+This will generate comprehensive charts and graphs in the `visualizations/` folder.
+
+## Important Notes
+
+- **Rate Limiting**: Free tier models have rate limits. The script includes automatic retry logic with exponential backoff and delays
+- **Runtime**: Testing 20 models takes 15-30 minutes depending on rate limits
+- **Adjustable**: Edit `NUM_TEST_CASES_PER_STOCK` in `main()` to reduce test cases if needed
+- **API Key**: Keep your `.env` file safe - it's automatically ignored by git
 
 ## Configuration
 
@@ -44,7 +59,7 @@ Edit the `main()` function in `backtest_llms.py` to customize:
 
 ```python
 TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA']  # Stocks to test
-NUM_TEST_CASES_PER_STOCK = 10  # Predictions per stock
+NUM_TEST_CASES_PER_STOCK = 5  # Predictions per stock (reduced to avoid rate limits)
 ```
 
 You can also modify the list of LLMs in the `TechnicalAnalysisBacktester.__init__()` method.
@@ -165,6 +180,20 @@ FINAL RANKINGS
    Accuracy: 64.00% (32/50)
 ...
 ```
+
+## Visualizations
+
+The `visualize_results.py` script generates the following charts:
+
+1. **Model Rankings** - Bar chart showing accuracy for each model
+2. **Confusion Matrices** - Prediction accuracy breakdown (UP/DOWN/NEUTRAL)
+3. **Per-Stock Accuracy** - How each model performs on different stocks
+4. **Prediction Distribution** - What types of predictions each model makes
+5. **Price Movements** - Actual price changes with prediction correctness
+6. **Accuracy vs Predictions** - Scatter plot comparing models
+7. **Summary Report** - Text file with detailed statistics
+
+All visualizations are saved as high-resolution PNG files in the `visualizations/` directory.
 
 ## License
 

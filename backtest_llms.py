@@ -11,8 +11,9 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
-import requests
+import time
 from typing import List, Dict, Any
+from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -20,41 +21,49 @@ load_dotenv()
 class TechnicalAnalysisBacktester:
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key
+        )
         self.results = []
         
         # List of free LLMs to test from OpenRouter
         self.llms_to_test = [
-            # DeepSeek models (top tier reasoning)
-            "deepseek/deepseek-chat-v3.1:free",
-            #"deepseek/deepseek-r1:free",
-            #"deepseek/deepseek-r1-0528:free",
+            "x-ai/grok-code-fast-1",
+            "anthropic/claude-sonnet-4.5",
+            "google/gemini-2.5-flash",
+            "deepseek/deepseek-chat-v3-0324",
+            "openai/gpt-oss-20b"
+            # # DeepSeek models (top tier reasoning)
+            # "deepseek/deepseek-chat-v3.1:free",
+            # #"deepseek/deepseek-r1:free",
+            # #"deepseek/deepseek-r1-0528:free",
             
-            # Qwen models (strong performance)
-            "qwen/qwen3-235b-a22b:free",
-            #"qwen/qwen-2.5-72b-instruct:free",
-            #"qwen/qwen3-coder:free",
+            # # Qwen models (strong performance)
+            # "qwen/qwen3-235b-a22b:free",
+            # #"qwen/qwen-2.5-72b-instruct:free",
+            # #"qwen/qwen3-coder:free",
             
-            # Meta Llama models
-            "meta-llama/llama-4-maverick:free",
-            #"meta-llama/llama-4-scout:free",
-            #"meta-llama/llama-3.3-70b-instruct:free",
-            #"meta-llama/llama-3.3-8b-instruct:free",
+            # # Meta Llama models
+            # "meta-llama/llama-4-maverick:free",
+            # #"meta-llama/llama-4-scout:free",
+            # #"meta-llama/llama-3.3-70b-instruct:free",
+            # #"meta-llama/llama-3.3-8b-instruct:free",
             
-            # Google models
-            "google/gemini-2.0-flash-exp:free",
-            #"google/gemma-3-27b-it:free",
-            #"google/gemma-3-12b-it:free",
+            # # Google models
+            # "google/gemini-2.0-flash-exp:free",
+            # #"google/gemma-3-27b-it:free",
+            # #"google/gemma-3-12b-it:free",
             
-            # Mistral models
-            #"mistralai/mistral-small-3.2-24b-instruct:free",
-            "mistralai/mistral-small-3:free",
+            # # Mistral models
+            # #"mistralai/mistral-small-3.2-24b-instruct:free",
+            # #"mistralai/mistral-small-3:free",
             
-            # Other interesting models
-            "moonshotai/kimi-k2:free",
-            "microsoft/mai-ds-r1:free",
-            "nvidia/nemotron-nano-9b-v2:free",
-            "tencent/hunyuan-a13b-instruct:free",
+            # # Other interesting models
+            # "moonshotai/kimi-k2:free",
+            # "microsoft/mai-ds-r1:free",
+            # "nvidia/nemotron-nano-9b-v2:free",
+            # "tencent/hunyuan-a13b-instruct:free",
         ]
     
     def calculate_technical_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -170,42 +179,51 @@ Do not include any explanation, just the prediction.
 """
         return prompt
     
-    def query_llm(self, model: str, prompt: str) -> str:
-        """Query an LLM via OpenRouter API"""
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-        
-        data = {
-            "model": model,
-            "messages": [
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.1,  # Low temperature for more consistent predictions
-            "max_tokens": 10,
-        }
-        
-        try:
-            response = requests.post(self.base_url, headers=headers, data=json.dumps(data), timeout=30)
-            response.raise_for_status()
-            result = response.json()
-            
-            prediction = result['choices'][0]['message']['content'].strip().upper()
-            
-            # Extract just the prediction word
-            if 'UP' in prediction:
-                return 'UP'
-            elif 'DOWN' in prediction:
-                return 'DOWN'
-            elif 'NEUTRAL' in prediction:
-                return 'NEUTRAL'
-            else:
-                return 'UNKNOWN'
+    def query_llm(self, model: str, prompt: str, max_retries: int = 3) -> str:
+        """Query an LLM via OpenRouter API with retry logic"""
+        for attempt in range(max_retries):
+            try:
+                completion = self.client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.1,  # Low temperature for more consistent predictions
+                    max_tokens=10,
+                )
                 
-        except Exception as e:
-            print(f"Error querying {model}: {e}")
-            return 'ERROR'
+                prediction = completion.choices[0].message.content.strip().upper()
+                
+                # Extract just the prediction word
+                if 'UP' in prediction:
+                    return 'UP'
+                elif 'DOWN' in prediction:
+                    return 'DOWN'
+                elif 'NEUTRAL' in prediction:
+                    return 'NEUTRAL'
+                else:
+                    return 'UNKNOWN'
+                    
+            except Exception as e:
+                error_msg = str(e)
+                
+                # Handle rate limiting
+                if '429' in error_msg or 'rate limit' in error_msg.lower():
+                    wait_time = (attempt + 1) * 5  # Exponential backoff: 5s, 10s, 15s
+                    print(f"Rate limited. Waiting {wait_time}s before retry {attempt + 1}/{max_retries}...")
+                    time.sleep(wait_time)
+                    continue
+                
+                # Handle other errors
+                if attempt < max_retries - 1:
+                    print(f"Error querying {model} (attempt {attempt + 1}/{max_retries}): {error_msg}")
+                    time.sleep(2)  # Short delay before retry
+                    continue
+                else:
+                    print(f"Error querying {model}: {error_msg}")
+                    return 'ERROR'
+        
+        return 'ERROR'
     
     def run_backtest(self, tickers: List[str], num_test_cases: int = 20):
         """Run the backtest across multiple stocks and LLMs"""
@@ -255,6 +273,9 @@ Do not include any explanation, just the prediction.
                 prompt = self.format_data_for_llm(test_case)
                 prediction = self.query_llm(llm, prompt)
                 
+                # Small delay to avoid rate limiting
+                #time.sleep(0.5)
+                
                 actual = test_case['actual_direction']
                 is_correct = prediction == actual
                 
@@ -277,9 +298,10 @@ Do not include any explanation, just the prediction.
                 
                 predictions.append(result)
                 
-                if (i + 1) % 5 == 0 or i == 0:
+                if (i + 1) % 10 == 0 or i == 0:
                     accuracy = (correct / total * 100) if total > 0 else 0
-                    print(f"Progress: {i+1}/{len(all_test_cases)} | Current Accuracy: {accuracy:.1f}% | Correct: {correct}/{total}")
+                    errors = i + 1 - total
+                    print(f"Progress: {i+1}/{len(all_test_cases)} | Accuracy: {accuracy:.1f}% ({correct}/{total}) | Errors: {errors}")
             
             accuracy = (correct / total * 100) if total > 0 else 0
             
@@ -293,6 +315,9 @@ Do not include any explanation, just the prediction.
             
             print(f"\n{llm} Results:")
             print(f"  Accuracy: {accuracy:.2f}% ({correct}/{total})")
+            
+            # Brief pause between models
+            #    .sleep(2)
         
         return llm_results
     
@@ -352,10 +377,19 @@ def main():
     
     # Configuration
     TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA']  # Stocks to test
-    NUM_TEST_CASES_PER_STOCK = 10  # Number of predictions per stock
+    NUM_TEST_CASES_PER_STOCK = 5  # Number of predictions per stock (reduced to avoid rate limits)
+    
+    print(f"\nConfiguration:")
+    print(f"  Stocks: {', '.join(TICKERS)}")
+    print(f"  Test cases per stock: {NUM_TEST_CASES_PER_STOCK}")
+    print(f"  Total test cases: {len(TICKERS) * NUM_TEST_CASES_PER_STOCK}")
     
     # Initialize backtester
     backtester = TechnicalAnalysisBacktester(api_key)
+    print(f"  Models to test: {len(backtester.llms_to_test)}")
+    print(f"  Total API calls: ~{len(TICKERS) * NUM_TEST_CASES_PER_STOCK * len(backtester.llms_to_test)}")
+    print(f"\nNote: Using free tier models with rate limiting and delays.")
+    print(f"This may take a while...\n")
     
     # Run backtest
     results = backtester.run_backtest(TICKERS, NUM_TEST_CASES_PER_STOCK)

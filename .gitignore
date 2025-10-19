@@ -42,7 +42,9 @@ env/
 
 # Output files
 results/
+visualizations/
 *.json
 *.csv
+*.png
 !example_output.json
 
