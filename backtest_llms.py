@@ -27,27 +27,27 @@ class TechnicalAnalysisBacktester:
         self.llms_to_test = [
             # DeepSeek models (top tier reasoning)
             "deepseek/deepseek-chat-v3.1:free",
-            "deepseek/deepseek-r1:free",
-            "deepseek/deepseek-r1-0528:free",
+            #"deepseek/deepseek-r1:free",
+            #"deepseek/deepseek-r1-0528:free",
             
             # Qwen models (strong performance)
             "qwen/qwen3-235b-a22b:free",
-            "qwen/qwen-2.5-72b-instruct:free",
-            "qwen/qwen3-coder:free",
+            #"qwen/qwen-2.5-72b-instruct:free",
+            #"qwen/qwen3-coder:free",
             
             # Meta Llama models
             "meta-llama/llama-4-maverick:free",
-            "meta-llama/llama-4-scout:free",
-            "meta-llama/llama-3.3-70b-instruct:free",
-            "meta-llama/llama-3.3-8b-instruct:free",
+            #"meta-llama/llama-4-scout:free",
+            #"meta-llama/llama-3.3-70b-instruct:free",
+            #"meta-llama/llama-3.3-8b-instruct:free",
             
             # Google models
             "google/gemini-2.0-flash-exp:free",
-            "google/gemma-3-27b-it:free",
-            "google/gemma-3-12b-it:free",
+            #"google/gemma-3-27b-it:free",
+            #"google/gemma-3-12b-it:free",
             
             # Mistral models
-            "mistralai/mistral-small-3.2-24b-instruct:free",
+            #"mistralai/mistral-small-3.2-24b-instruct:free",
             "mistralai/mistral-small-3:free",
             
             # Other interesting models
@@ -143,7 +143,6 @@ class TechnicalAnalysisBacktester:
         prompt = f"""You are a technical analyst. Analyze the following stock data and predict whether the stock will go UP, DOWN, or remain NEUTRAL for the next trading day.
 
 Current Price: ${test_case['current_price']:.2f}
-Date: {test_case['date']}
 
 RECENT PRICE ACTION (Last 5 days):
 """
@@ -176,8 +175,6 @@ Do not include any explanation, just the prediction.
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/backtesting-llms",
-            "X-Title": "LLM Technical Analysis Backtester",
         }
         
         data = {
