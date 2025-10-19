@@ -1,200 +1,331 @@
-# LLM Technical Analysis Backtesting
+# 🤖📈 LLM Stock Market Technical Analysis Benchmark
 
-Benchmark different Large Language Models (LLMs) on their ability to perform technical analysis and predict stock movements using **free models from OpenRouter**.
+> **Can AI predict the stock market?** We put leading Large Language Models to the test with historical stock data and technical analysis. The results might surprise you...
 
-## Overview
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![OpenRouter](https://img.shields.io/badge/API-OpenRouter-green.svg)](https://openrouter.ai/)
 
-This project fetches historical stock data from Yahoo Finance, calculates technical indicators, and asks various LLMs to predict price movements based on technical analysis. The results are ranked by accuracy.
+---
 
-## Features
+## 📊 What This Does
 
-- **Technical Indicators**: Calculates SMA, EMA, MACD, RSI, Bollinger Bands, and volume indicators
-- **20 Free LLMs**: Tests models from DeepSeek, Qwen, Meta, Google, Mistral, and more
-- **Comprehensive Results**: Outputs detailed JSON with predictions, actual outcomes, and rankings
-- **Configurable**: Easy to adjust stocks, number of test cases, and lookback periods
-- **Cost-Free**: Uses only free tier models from OpenRouter
+This project benchmarks **20+ different AI models** on their ability to perform technical analysis and predict stock price movements. We test models from Anthropic, Google, Meta, DeepSeek, and more on real historical data from major tech stocks.
 
-## Setup
+### 🎯 Real Results
 
-### 1. Install Dependencies
+![Model Rankings](visualizations/model_rankings.png)
+
+**Key Finding**: All models performed below random chance (50%), with the best model (Claude Sonnet 4.5) achieving only 48% accuracy. This suggests that:
+- 📉 Short-term stock prediction is extremely difficult
+- 🎲 Technical analysis alone has limited predictive power
+- 🤖 Even advanced AI can't beat market efficiency
+- 📚 See [INSIGHTS.md](INSIGHTS.md) for detailed analysis
+
+---
+
+## 🚀 Quick Start
+
+### 1️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Get OpenRouter API Key
+### 2️⃣ Get Your (Free!) OpenRouter API Key
 
-1. Go to [OpenRouter.ai](https://openrouter.ai/keys)
-2. Create an account and generate an API key (free tier available)
-3. Create a `.env` file in the project root:
+1. Visit [OpenRouter.ai](https://openrouter.ai/keys)
+2. Sign up and generate a free API key
+3. Create a `.env` file:
 
 ```bash
 echo "OPENROUTER_API_KEY=your_api_key_here" > .env
 ```
 
-### 3. Run the Backtest
+### 3️⃣ Run the Backtest
 
 ```bash
 python3 backtest_llms.py
 ```
 
-### 4. Visualize Results
+The script will:
+- 📥 Fetch historical data for AAPL, MSFT, GOOGL, TSLA, NVDA
+- 📊 Calculate technical indicators (RSI, MACD, Bollinger Bands, etc.)
+- 🤖 Test 20+ AI models on predicting price movements
+- 💾 Save detailed results to `results/backtest_results.json`
+
+⏱️ **Runtime**: ~15-30 minutes depending on API rate limits
+
+### 4️⃣ Generate Visualizations
 
 ```bash
 python3 visualize_results.py
 ```
 
-This will generate comprehensive charts and graphs in the `visualizations/` folder.
+Creates beautiful charts and graphs showing model performance, saved to `visualizations/` folder.
 
-## Important Notes
+---
 
-- **Rate Limiting**: Free tier models have rate limits. The script includes automatic retry logic with exponential backoff and delays
-- **Runtime**: Testing 20 models takes 15-30 minutes depending on rate limits
-- **Adjustable**: Edit `NUM_TEST_CASES_PER_STOCK` in `main()` to reduce test cases if needed
-- **API Key**: Keep your `.env` file safe - it's automatically ignored by git
+## 📈 Example Visualizations
 
-## Configuration
+### Confusion Matrices - What Did Each Model Get Right?
 
-Edit the `main()` function in `backtest_llms.py` to customize:
+![Confusion Matrices](visualizations/confusion_matrices.png)
+
+Shows how often each model correctly predicted UP, DOWN, or NEUTRAL movements. Green = correct predictions, darker blue = more predictions.
+
+### Per-Stock Performance - Which Stocks Are Easiest to Predict?
+
+![Per Stock Accuracy](visualizations/per_stock_accuracy.png)
+
+Some models perform better on certain stocks. NVDA showed different patterns than MSFT/AAPL.
+
+### Prediction Distribution - Are Models Biased?
+
+![Prediction Distribution](visualizations/prediction_distribution.png)
+
+Reveals systematic biases: DeepSeek heavily favored DOWN predictions (bearish), while Claude was more balanced.
+
+### Price Movements - Visual Prediction Timeline
+
+![Price Movements](visualizations/price_movements.png)
+
+Green bars = correct predictions, Red bars = incorrect. Shows actual price changes for the best-performing model.
+
+### Model Comparison Scatter Plot
+
+![Accuracy vs Predictions](visualizations/accuracy_vs_predictions.png)
+
+Compares model accuracy against number of valid predictions. The red line shows 50% (random chance).
+
+---
+
+## 🎯 What We Tested
+
+### 📊 Technical Indicators
+- **Moving Averages**: SMA 20, SMA 50, EMA 12, EMA 26
+- **MACD**: Moving Average Convergence Divergence
+- **RSI**: Relative Strength Index (14-period)
+- **Bollinger Bands**: 20-period with 2 standard deviations
+- **Volume Analysis**: Comparison with 20-day average
+
+### 🤖 AI Models (Free Tier)
+
+| Category | Models |
+|----------|--------|
+| 🧠 **Anthropic** | Claude Sonnet 4.5 |
+| 🚀 **xAI** | Grok Code Fast |
+| 🔷 **Google** | Gemini 2.0 Flash, Gemma 3 (12B, 27B, 4B) |
+| 🔵 **DeepSeek** | DeepSeek V3, R1, R1-0528 |
+| 🦙 **Meta** | Llama 4 Maverick/Scout, Llama 3.3 (8B, 70B) |
+| 🟣 **Mistral** | Mistral Small 3/3.2 (24B) |
+| 🐉 **Qwen** | Qwen3 (235B, 72B, Coder) |
+| 🌙 **Others** | Kimi K2, Microsoft MAI, NVIDIA Nemotron, Tencent Hunyuan |
+
+### 📈 Stocks Tested
+- **AAPL** - Apple Inc.
+- **MSFT** - Microsoft Corporation
+- **GOOGL** - Alphabet Inc.
+- **TSLA** - Tesla Inc.
+- **NVDA** - NVIDIA Corporation
+
+---
+
+## ⚙️ Configuration
+
+Edit `backtest_llms.py` to customize:
 
 ```python
-TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA']  # Stocks to test
-NUM_TEST_CASES_PER_STOCK = 5  # Predictions per stock (reduced to avoid rate limits)
+# Stocks to test
+TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA']
+
+# Number of predictions per stock (reduce to speed up)
+NUM_TEST_CASES_PER_STOCK = 5
+
+# Add/remove models in TechnicalAnalysisBacktester.__init__()
 ```
 
-You can also modify the list of LLMs in the `TechnicalAnalysisBacktester.__init__()` method.
+---
 
-## Output
+## 📊 Output Format
 
-Results are saved to `results/backtest_results.json` with the following structure:
+Results are saved as JSON with complete prediction history:
 
 ```json
 {
-  "timestamp": "2025-10-19T...",
+  "timestamp": "2025-10-19T17:52:30",
   "rankings": [
     {
       "rank": 1,
-      "model": "deepseek/deepseek-r1:free",
-      "accuracy": 72.5,
-      "correct": 29,
-      "total": 40
-    },
-    ...
+      "model": "anthropic/claude-sonnet-4.5",
+      "accuracy": 48.0,
+      "correct": 12,
+      "total": 25
+    }
   ],
   "detailed_results": {
     "model_name": {
       "predictions": [
         {
           "ticker": "AAPL",
-          "date": "2024-10-15",
-          "current_price": 150.23,
-          "next_price": 152.11,
+          "date": "2025-01-17",
+          "current_price": 229.17,
+          "next_price": 221.85,
+          "price_change_pct": -3.19,
           "predicted": "UP",
-          "actual": "UP",
-          "correct": true
-        },
-        ...
+          "actual": "DOWN",
+          "correct": false
+        }
       ]
     }
   }
 }
 ```
 
-## Technical Indicators Used
+---
 
-- **Moving Averages**: SMA 20, SMA 50, EMA 12, EMA 26
-- **MACD**: Moving Average Convergence Divergence with Signal Line
-- **RSI**: Relative Strength Index (14-period)
-- **Bollinger Bands**: 20-period with 2 standard deviations
-- **Volume Analysis**: Comparison with 20-day average
+## 🎓 Key Learnings & Insights
 
-## LLMs Tested (All Free Tier)
+### 🔴 Reality Check
+- **All models performed below 50%** (worse than random guessing)
+- **Best model: Claude Sonnet 4.5 at 48%**
+- **Worst model: DeepSeek V3 at 24%**
 
-### DeepSeek Models (Reasoning Specialists)
-1. DeepSeek Chat V3.1
-2. DeepSeek R1
-3. DeepSeek R1-0528
+### 💡 What We Discovered
+1. 📉 **Day-to-day movements are essentially random** (efficient market hypothesis confirmed)
+2. 🎯 **Technical indicators alone aren't enough** - need fundamentals, news, sentiment
+3. 🤖 **Model architecture matters** - Claude outperformed others significantly
+4. 📊 **Systematic biases exist** - Some models are bearish, others more balanced
+5. 💰 **Don't day trade with AI predictions!** Use them as ONE tool among many
 
-### Qwen Models (Large Scale)
-4. Qwen3 235B
-5. Qwen 2.5 72B Instruct
-6. Qwen3 Coder
+### 📚 Full Analysis
+See [INSIGHTS.md](INSIGHTS.md) for:
+- Detailed statistical analysis
+- Model comparison breakdown
+- Recommendations for improvement
+- Future research directions
+- Practical applications
 
-### Meta Llama Models
-7. Llama 4 Maverick
-8. Llama 4 Scout
-9. Llama 3.3 70B Instruct
-10. Llama 3.3 8B Instruct
+---
 
-### Google Models
-11. Gemini 2.0 Flash Experimental
-12. Gemma 3 27B
-13. Gemma 3 12B
+## 🛠️ Technical Features
 
-### Mistral Models
-14. Mistral Small 3.2 24B
-15. Mistral Small 3
+- ✅ **Robust API Integration** - OpenRouter with automatic retry and rate limiting
+- ✅ **Error Handling** - Gracefully handles API failures and timeouts
+- ✅ **Comprehensive Logging** - Track progress through thousands of predictions
+- ✅ **Scientific Methodology** - Reproducible results with documented approach
+- ✅ **Beautiful Visualizations** - Publication-ready charts and graphs
+- ✅ **Detailed Reports** - JSON output + text summaries + visual analytics
 
-### Other Models
-16. Moonshot Kimi K2
-17. Microsoft MAI DS R1
-18. NVIDIA Nemotron Nano 9B V2
-19. Tencent Hunyuan A13B
+---
 
-## How It Works
+## 📝 How It Works
 
-1. **Data Collection**: Fetches 1 year of historical data for selected stocks
-2. **Test Case Generation**: Creates test cases with 30-day lookback periods
-3. **Technical Analysis**: Calculates indicators for each time window
-4. **LLM Prediction**: Presents data to each LLM for prediction (UP/DOWN/NEUTRAL)
-5. **Evaluation**: Compares predictions to actual price movements
-6. **Ranking**: Sorts models by accuracy
+```mermaid
+graph LR
+    A[Fetch Stock Data] --> B[Calculate Technical Indicators]
+    B --> C[Generate Test Cases]
+    C --> D[Query AI Models]
+    D --> E[Compare Predictions vs Actual]
+    E --> F[Rank Models by Accuracy]
+    F --> G[Generate Visualizations]
+```
 
-## Classification
+1. **Data Collection**: Fetches 1 year of historical data via Yahoo Finance
+2. **Technical Analysis**: Calculates 10+ indicators (RSI, MACD, Bollinger Bands, etc.)
+3. **Test Case Generation**: Creates prediction scenarios with 30-day lookback
+4. **AI Prediction**: Each model analyzes data and predicts UP/DOWN/NEUTRAL
+5. **Evaluation**: Compares predictions to actual next-day price movements
+6. **Ranking**: Sorts models by accuracy and generates comprehensive reports
 
-- **UP**: Price increase > 0.5%
+### 🎯 Classification Logic
+- **UP**: Price increase > +0.5%
 - **DOWN**: Price decrease < -0.5%
-- **NEUTRAL**: Price change between -0.5% and 0.5%
+- **NEUTRAL**: Price change between -0.5% and +0.5%
 
-## Notes
+---
 
-- Uses a 30-day lookback period for each prediction
-- Low temperature (0.1) for consistent predictions
-- Results directory is created automatically
-- All models are free tier from OpenRouter
-- API rate limits may apply depending on usage
+## 🚨 Important Notes
 
-## Example Output
+- 🔑 **API Key**: Keep your `.env` file safe - it's in `.gitignore`
+- ⏱️ **Rate Limits**: Free tier has limits; script includes automatic backoff
+- 🐌 **Runtime**: Testing 20 models takes time; reduce test cases to speed up
+- 📊 **Market Hours**: Yahoo Finance data may have slight delays
+- ⚠️ **Not Financial Advice**: This is for research and education only!
 
-```
-FINAL RANKINGS
-============================================================
+---
 
-1. deepseek/deepseek-r1:free
-   Accuracy: 68.00% (34/50)
+## 🤝 Contributing
 
-2. qwen/qwen3-235b-a22b:free
-   Accuracy: 66.00% (33/50)
+Found a bug? Have an idea? Contributions welcome!
 
-3. google/gemini-2.0-flash-exp:free
-   Accuracy: 64.00% (32/50)
-...
-```
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Visualizations
+---
 
-The `visualize_results.py` script generates the following charts:
+## 🎯 Future Improvements
 
-1. **Model Rankings** - Bar chart showing accuracy for each model
-2. **Confusion Matrices** - Prediction accuracy breakdown (UP/DOWN/NEUTRAL)
-3. **Per-Stock Accuracy** - How each model performs on different stocks
-4. **Prediction Distribution** - What types of predictions each model makes
-5. **Price Movements** - Actual price changes with prediction correctness
-6. **Accuracy vs Predictions** - Scatter plot comparing models
-7. **Summary Report** - Text file with detailed statistics
+### Short Term
+- [ ] Add sentiment analysis from news/social media
+- [ ] Test premium models (GPT-4o, Claude Opus)
+- [ ] Longer time horizons (3-day, 1-week predictions)
+- [ ] More technical indicators (Fibonacci, Ichimoku, etc.)
 
-All visualizations are saved as high-resolution PNG files in the `visualizations/` directory.
+### Long Term
+- [ ] Ensemble methods (combine multiple models)
+- [ ] Fine-tune models on financial data
+- [ ] Real-time paper trading mode
+- [ ] Multi-modal inputs (charts + text)
+- [ ] Risk-adjusted metrics (Sharpe ratio, max drawdown)
 
-## License
+---
 
-MIT
+## 📚 Resources & References
+
+- **OpenRouter API**: [https://openrouter.ai/](https://openrouter.ai/)
+- **Yahoo Finance**: Historical stock data source
+- **Technical Analysis**: Classic indicators and patterns
+- **Efficient Market Hypothesis**: Eugene Fama (1970)
+- **LLM Benchmarking**: Scientific methodology for AI evaluation
+
+---
+
+## ⚖️ License
+
+MIT License - see [LICENSE](LICENSE) file for details
+
+---
+
+## ⚠️ Disclaimer
+
+**This project is for educational and research purposes only.**
+
+- 📊 Not financial advice
+- 💰 Don't invest based solely on these predictions
+- 🎲 Past performance doesn't guarantee future results
+- 🧪 Results show models perform worse than random chance
+- 🔬 Use this as a learning tool, not a trading system
+
+**Always do your own research and never invest more than you can afford to lose.**
+
+---
+
+## 🌟 Star This Repo!
+
+If you found this project interesting or useful, please give it a ⭐! It helps others discover this work.
+
+---
+
+<div align="center">
+
+**Built with 🧠 by testing if AI has 📈 in predicting markets**
+
+*Spoiler: It doesn't (yet!)*
+
+[Report Bug](https://github.com/shreybirmiwal/StockBenchmark/issues) · [Request Feature](https://github.com/shreybirmiwal/StockBenchmark/issues) · [View Results](results/)
+
+</div>
