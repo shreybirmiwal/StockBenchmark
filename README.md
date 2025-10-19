@@ -1,11 +1,6 @@
 # 🤖📈 LLM Stock Market Technical Analysis Benchmark
 
 > **Can AI predict the stock market?** We put leading Large Language Models to the test with historical stock data and technical analysis. The results might surprise you...
-
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OpenRouter](https://img.shields.io/badge/API-OpenRouter-green.svg)](https://openrouter.ai/)
-
 ---
 
 ## 📊 What This Does
